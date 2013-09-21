@@ -3,6 +3,7 @@ package com.supremefist.klwc;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.io.File;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
@@ -14,7 +15,16 @@ import javax.swing.JOptionPane;
 
 
 public class View extends JFrame {
-    public View() {
+    private AcupunctureViewer control = null;
+    private JFileChooser fc = null;
+    
+    public View(AcupunctureViewer newAcupunctureViewer) {
+        control = newAcupunctureViewer;
+        
+        fc = new JFileChooser();
+        fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        fc.setCurrentDirectory(new File(System.getProperty("user.dir")));
+        
         setTitle("KLWC Acupuncture Viewer");
         setSize(800, 600);
         setLocationRelativeTo(null);
@@ -32,12 +42,11 @@ public class View extends JFrame {
 
         @Override
         public void actionPerformed(ActionEvent event) {
-            final JFileChooser fc = new JFileChooser();
-            fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
             int returnVal = fc.showOpenDialog(view);
             
             if (returnVal == 0) {
                 System.out.println("User wants to load: " + fc.getSelectedFile());
+                control.loadDir(fc.getSelectedFile());
             }
         }
         
