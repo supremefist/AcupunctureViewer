@@ -93,7 +93,29 @@ public class PatientSQLiteDB {
                         postCode, sex, bsn);
                 
                 patients.add(p);
+            }
+            
+        
+            for (Patient p: patients) {
+                List<Consultation> consultations = new ArrayList<Consultation>();
+                adminStatement = adminConnection.createStatement();
+                rs = adminStatement
+                        .executeQuery("select * from Consulten where PatientNummer = " + p.getId() + ";");
 
+                while (rs.next()) {
+                    // read the result set
+                    int id = rs.getInt("ConsultID");
+                    Date dateOfConsultation = new Date(rs.getLong("ConsultDatum") * 1000L);
+                    String history = rs.getString("Anamnese");
+                    
+                    Consultation c = new Consultation(id, dateOfConsultation, history);
+                    
+                    consultations.add(c);
+                    
+                }
+                
+                Collections.sort(consultations);
+                p.setConsultations(consultations);
             }
         } catch (SQLException e) {
             // if the error message is "out of memory",

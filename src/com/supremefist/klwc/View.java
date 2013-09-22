@@ -1,6 +1,7 @@
 package com.supremefist.klwc;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -17,17 +18,27 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.ListSelectionModel;
 
 
 public class View extends JFrame {
     private AcupunctureViewer control = null;
     private JFileChooser fc = null;
+    
     private JList patientList = null;
     private DefaultListModel patientListModel = null;
     private JScrollPane patientListScroller = null;
+    
     private BorderLayout mainLayout = null;
+    
+    private JList consultationList = null;
+    private DefaultListModel consultationListModel = null;
+    private JScrollPane consultationListScroller = null;
+    
+    private JTextArea consultationInfoArea = null;
     
     public View(AcupunctureViewer newAcupunctureViewer) {
         control = newAcupunctureViewer;
@@ -117,22 +128,46 @@ public class View extends JFrame {
         mainLayout = new BorderLayout();
         setLayout(mainLayout);
         
-        String patients[] = {"a", "b", "c"};
-        
         patientListModel = new DefaultListModel();
         patientList = new JList(patientListModel);
-        
         patientList.setCellRenderer(new PatientCellRenderer());
         patientList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         
-        ListSelectionModel selection = patientList.getSelectionModel();
-        selection.addListSelectionListener(
-                new PatientListSelectionHandler(patientListModel));
+        ListSelectionModel patientSelection = patientList.getSelectionModel();
+        patientSelection.addListSelectionListener(
+                new PatientListSelectionHandler(control));
         
         patientListScroller = new JScrollPane(patientList);
         patientListScroller.setPreferredSize(new Dimension(250, 80));
         add(patientListScroller, BorderLayout.LINE_START);
         
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new BorderLayout());
+        
+        JPanel consultationPanel = new JPanel();
+        consultationPanel.setLayout(new BorderLayout());
+        mainPanel.add(consultationPanel, BorderLayout.PAGE_START);
+        
+        consultationListModel = new DefaultListModel();
+        consultationList = new JList(consultationListModel);
+        consultationList.setCellRenderer(new ConsultationCellRenderer());
+        consultationList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        
+        ListSelectionModel consultationSelection = consultationList.getSelectionModel();
+        consultationSelection.addListSelectionListener(
+                new ConsultationListSelectionHandler(control));
+        
+        consultationListScroller = new JScrollPane(consultationList);
+        consultationListScroller.setPreferredSize(new Dimension(100, 200));
+        consultationPanel.add(consultationListScroller, BorderLayout.LINE_START);
+        
+        consultationInfoArea = new JTextArea();
+        consultationInfoArea.setText("No info.");
+        consultationInfoArea.setEditable(false);
+        consultationPanel.add(consultationInfoArea, BorderLayout.CENTER);
+        
+        
+        add(mainPanel, BorderLayout.CENTER);
     }
 
     public void showMessage(String string) {
@@ -144,5 +179,28 @@ public class View extends JFrame {
         for (Patient p : patients) {
             patientListModel.addElement(p);
         }
+    }
+
+    public DefaultListModel getPatientListModel() {
+        return patientListModel;
+    }
+
+    public void setConsultations(List<Consultation> consultations) {
+        consultationListModel.clear();
+        for (Consultation c : consultations) {
+            consultationListModel.addElement(c);
+        }
+        if (consultations.size() > 0) {
+            consultationList.setSelectedIndex(0);
+        }
+        
+    }
+
+    public DefaultListModel getConsultationListModel() {
+        return consultationListModel;
+    }
+
+    public void setSelectedConsultation(Consultation consultation) {
+        consultationInfoArea.setText(consultation.getHistory());
     }
 }

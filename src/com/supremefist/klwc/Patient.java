@@ -1,6 +1,7 @@
 package com.supremefist.klwc;
 
 import java.util.Date;
+import java.util.List;
 
 public class Patient implements Comparable {
     private int id = -1;
@@ -17,6 +18,7 @@ public class Patient implements Comparable {
     private String postCode = "";
     private String sex = "";
     private String bsn = "";
+    private List<Consultation> consultations = null;
 
     public Patient(int id, String firstName, String surName, String street,
             String houseNumber, String residence, String country,
@@ -63,5 +65,17 @@ public class Patient implements Comparable {
     @Override
     public int compareTo(Object o) {
         return (this.getName().compareTo(((Patient)o).getName()));
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setConsultations(List<Consultation> consultations) {
+        this.consultations = consultations;
+    }
+
+    public List<Consultation> getConsultations() {
+        return consultations;
     }
 }

@@ -3,6 +3,7 @@ package com.supremefist.klwc;
 import java.io.File;
 import java.util.List;
 
+import javax.swing.DefaultListModel;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
@@ -48,6 +49,22 @@ public class AcupunctureViewer {
         
         view.setPatientList(patients);
     
+    }
+
+    public DefaultListModel getPatientListModel() {
+        return view.getPatientListModel();
+    }
+
+    public void setSelectedPatient(Patient patient) {
+        view.setConsultations(patient.getConsultations());
+    }
+
+    public DefaultListModel getConsultationListModel() {
+        return view.getConsultationListModel();
+    }
+
+    public void setSelectedConsultation(Consultation consultation) {
+        view.setSelectedConsultation(consultation);
     }
 }    
 
