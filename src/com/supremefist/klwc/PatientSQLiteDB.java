@@ -6,71 +6,112 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+
+import javax.swing.JOptionPane;
 
 public class PatientSQLiteDB {
     private File dir = null;
     
+    Connection adminConnection = null;
+    Connection acupunctureConnection = null;
+    Connection layoutConnection = null;
+    
+    File administrationFilename;
+    File acupunctureFilename;
+    File layoutFilename;
+
     public PatientSQLiteDB(File newDirName) {
         dir = newDirName;
+        
+        administrationFilename = new File(dir, "Administration.sqlite");
+        acupunctureFilename = new File(dir, "Acupuncture.sqlite");
+        layoutFilename = new File(dir, "Layout.sqlite");
     }
     
-    public void read() {
-        Connection adminConnection = null;
-        Connection acupunctureConnection = null;
-        Connection layoutConnection = null;
-        
-        File administrationFilename = new File(dir, "Administration.sqlite");
-        File acupunctureFilename = new File(dir, "Acupuncture.sqlite");
-        File layoutFilename = new File(dir, "Layout.sqlite");
-        
+    public void connect() {
         try {
-          Class.forName("org.sqlite.JDBC");
-          adminConnection = DriverManager.getConnection("jdbc:sqlite:" + administrationFilename.getAbsolutePath());
-          acupunctureConnection = DriverManager.getConnection("jdbc:sqlite:" + acupunctureFilename.getAbsolutePath());
-          layoutConnection = DriverManager.getConnection("jdbc:sqlite:" + layoutFilename.getAbsolutePath());
-        } catch ( Exception e ) {
-          System.err.println( e.getClass().getName() + ": " + e.getMessage() );
-          System.exit(0);
+            Class.forName("org.sqlite.JDBC");
+            adminConnection = DriverManager.getConnection("jdbc:sqlite:"
+                    + administrationFilename.getAbsolutePath());
+            acupunctureConnection = DriverManager.getConnection("jdbc:sqlite:"
+                    + acupunctureFilename.getAbsolutePath());
+            layoutConnection = DriverManager.getConnection("jdbc:sqlite:"
+                    + layoutFilename.getAbsolutePath());
+            
+            System.out.println("Opened database successfully");
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
         }
+    }
+    
+    public Boolean ready() {
         
-        System.out.println("Opened database successfully");
-        
+        if (!administrationFilename.exists() || !acupunctureFilename.exists() || !layoutFilename.exists()) {
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<Patient> getPatients() {
+        List<Patient> patients = new ArrayList<Patient>();
+
         try {
-            Statement statement = adminConnection.createStatement();
-            statement.setQueryTimeout(30);  // set timeout to 30 sec.
-            
-//            statement.executeUpdate("drop table if exists person");
-//            statement.executeUpdate("create table person (id integer, name string)");
-//            statement.executeUpdate("insert into person values(1, 'leo')");
-//            statement.executeUpdate("insert into person values(2, 'yui')");
-            
-            ResultSet rs = statement.executeQuery("SELECT * FROM sqlite_master WHERE type='table';");
-            //ResultSet rs = statement.executeQuery("SELECT * FROM dbname.sqlite_master WHERE type='table';");
-            while(rs.next())
-            {
-              // read the result set
-              System.out.println("name = " + rs.getString("name"));
+            Statement adminStatement = adminConnection.createStatement();
+            adminStatement.setQueryTimeout(30); // set timeout to 30 sec.
+
+            ResultSet rs = adminStatement
+                    .executeQuery("select * from Patients;");
+
+            while (rs.next()) {
+                // read the result set
+                int id = rs.getInt("PatientID");
+                String firstName = rs.getString("Voornaam");
+                String surName = rs.getString("Achternaam");
+                String street = rs.getString("Straat");
+                String houseNumber = rs.getString("Huisnummer");
+                String residence = rs.getString("Woonplaats");
+                String country = rs.getString("Land");
+                Date dateOfBirth = new Date(rs.getLong("Gebdatum") * 1000L);
+                Date dateOfRegistration = new Date(rs.getLong("Inschrijfdatum") * 1000L);
+                String phoneNumber = rs.getString("Telefoonnummer");
+                String emailAddress = rs.getString("EMailadres");
+                String postCode = rs.getString("Postcode");
+                String sex = rs.getString("Geslacht");
+                String bsn = rs.getString("BSN");
+
+                Patient p = new Patient(id, firstName, surName, street,
+                        houseNumber, residence, country, dateOfBirth,
+                        dateOfRegistration, phoneNumber, emailAddress,
+                        postCode, sex, bsn);
+                
+                patients.add(p);
+
+            }
+        } catch (SQLException e) {
+            // if the error message is "out of memory",
+            // it probably means no database file is found
+            System.err.println(e.getMessage());
+        } finally {
+            try {
+                if (adminConnection != null) {
+                    adminConnection.close();
+                }
+            } catch (SQLException e) {
+                // connection close failed.
+                System.err.println(e);
             }
         }
-        catch(SQLException e)
-        {
-          // if the error message is "out of memory", 
-          // it probably means no database file is found
-          System.err.println(e.getMessage());
-        }
-        finally
-        {
-          try
-          {
-            if(adminConnection != null) {
-                adminConnection.close();
-            }
-          }
-          catch(SQLException e)
-          {
-            // connection close failed.
-            System.err.println(e);
-          }
-        }
+        
+        Collections.sort(patients);
+        
+        return patients;
     }
 }

@@ -1,8 +1,10 @@
 package com.supremefist.klwc;
 
 import java.io.File;
+import java.util.List;
 
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 public class AcupunctureViewer {
@@ -19,6 +21,7 @@ public class AcupunctureViewer {
     }
     
     public void start() {
+        view.initUI();
         view.setVisible(true);
     }
     
@@ -33,9 +36,18 @@ public class AcupunctureViewer {
         });
     }
 
-    public void loadDir(File selectedDir) {
+    public void selectDataDir(File selectedDir) {
         db = new PatientSQLiteDB(selectedDir);
-        db.read();
+        if (!db.ready()) {
+            view.showMessage("All data not found in specified directory!");
+            return;
+        }
+    
+        db.connect();
+        List<Patient> patients = db.getPatients();
+        
+        view.setPatientList(patients);
+    
     }
 }    
 
