@@ -15,7 +15,8 @@ public class PatientListSelectionHandler implements ListSelectionListener {
     @Override
     public void valueChanged(ListSelectionEvent e) {
         ListSelectionModel lsm = (ListSelectionModel)e.getSource();
-        control.setSelectedPatient((Patient) control.getPatientListModel().get(lsm.getMinSelectionIndex()));
+        Patient selectedPatient = (Patient) control.getPatientListModel().get(lsm.getMinSelectionIndex());
+        control.setSelectedPatient(selectedPatient);
     }
 
 }

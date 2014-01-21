@@ -38,7 +38,12 @@ public class View extends JFrame {
     private DefaultListModel consultationListModel = null;
     private JScrollPane consultationListScroller = null;
     
+    private JList meridianList = null;
+    private DefaultListModel meridianListModel = null;
+    private JScrollPane meridianListScroller = null;
+    
     private JTextArea consultationInfoArea = null;
+    private JTextArea consultationDetailArea = null;
     
     public View(AcupunctureViewer newAcupunctureViewer) {
         control = newAcupunctureViewer;
@@ -147,7 +152,8 @@ public class View extends JFrame {
         JPanel consultationPanel = new JPanel();
         consultationPanel.setLayout(new BorderLayout());
         mainPanel.add(consultationPanel, BorderLayout.PAGE_START);
-        
+
+        // Consultation list
         consultationListModel = new DefaultListModel();
         consultationList = new JList(consultationListModel);
         consultationList.setCellRenderer(new ConsultationCellRenderer());
@@ -156,18 +162,42 @@ public class View extends JFrame {
         ListSelectionModel consultationSelection = consultationList.getSelectionModel();
         consultationSelection.addListSelectionListener(
                 new ConsultationListSelectionHandler(control));
-        
         consultationListScroller = new JScrollPane(consultationList);
         consultationListScroller.setPreferredSize(new Dimension(100, 200));
         consultationPanel.add(consultationListScroller, BorderLayout.LINE_START);
         
+        // Consultation info area
         consultationInfoArea = new JTextArea();
         consultationInfoArea.setText("No info.");
         consultationInfoArea.setEditable(false);
-        consultationPanel.add(consultationInfoArea, BorderLayout.CENTER);
+        JScrollPane consultationInfoScroll = new JScrollPane(consultationInfoArea);
+        consultationPanel.add(consultationInfoScroll, BorderLayout.CENTER);
         
+        // Meridian list
+        meridianListModel = new DefaultListModel();
+        meridianList = new JList(meridianListModel);
+        meridianList.setCellRenderer(new MeridianCellRenderer());
+        meridianList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        
+        ListSelectionModel meridianSelection = meridianList.getSelectionModel();
+        meridianSelection.addListSelectionListener(
+                new MeridianListSelectionHandler(control));
+        meridianListScroller = new JScrollPane(meridianList);
+        meridianListScroller.setPreferredSize(new Dimension(100, 200));
+        mainPanel.add(meridianListScroller, BorderLayout.WEST);
+
+        // Consultation detail area
+        consultationDetailArea = new JTextArea();
+        consultationDetailArea.setText("");
+        consultationDetailArea.setEditable(false);
+        JScrollPane consultationDetailScroll = new JScrollPane(consultationDetailArea);
+        mainPanel.add(consultationDetailScroll, BorderLayout.CENTER);
         
         add(mainPanel, BorderLayout.CENTER);
+        
+        
+        
+        setVisible(true);
     }
 
     public void showMessage(String string) {
@@ -178,6 +208,13 @@ public class View extends JFrame {
         patientListModel.clear();
         for (Patient p : patients) {
             patientListModel.addElement(p);
+        }
+    }
+    
+    public void setMeridianList(List<Meridian> meridians) {
+        meridianListModel.clear();
+        for (Meridian m : meridians) {
+            meridianListModel.addElement(m);
         }
     }
 
@@ -202,5 +239,25 @@ public class View extends JFrame {
 
     public void setSelectedConsultation(Consultation consultation) {
         consultationInfoArea.setText(consultation.getHistory());
+        
+        List<SidedAcupuncturePoint> points = consultation.getAcupuncturePoints();
+        
+        consultationDetailArea.setText("");
+        
+        for (SidedAcupuncturePoint p: points) {
+            String currentText = consultationDetailArea.getText();
+            if (p.side == SidedAcupuncturePoint.LEFT) {
+                //consultationDetailArea.setText(currentText + "Left: " + p.p.commonName + "\n");
+                consultationDetailArea.setText(currentText + p.p.commonName + ": " + p.p.name + "\n");
+            }
+//            else if (p.side == SidedAcupuncturePoint.RIGHT) {
+//                consultationDetailArea.setText(currentText + "Right: " + p.p.commonName + "\n");
+//            }
+            
+        }
+    }
+
+    public DefaultListModel getMeridianListModel() {
+        return meridianListModel;
     }
 }
