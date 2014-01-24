@@ -3,6 +3,7 @@ package com.supremefist.klwc;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -11,8 +12,10 @@ import java.util.List;
 
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
+import javax.swing.JEditorPane;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -42,8 +45,9 @@ public class View extends JFrame {
     private DefaultListModel meridianListModel = null;
     private JScrollPane meridianListScroller = null;
     
-    private JTextArea consultationInfoArea = null;
-    private JTextArea consultationDetailArea = null;
+    private JEditorPane consultationInfoArea = null;
+    private JLabel consultationLeftDetailArea = null;
+    private JLabel consultationRightDetailArea = null;
     
     public View(AcupunctureViewer newAcupunctureViewer) {
         control = newAcupunctureViewer;
@@ -120,7 +124,7 @@ public class View extends JFrame {
         aMenuItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent event) {
-                JOptionPane.showMessageDialog(null, "My Goodness, this is so concise");
+                JOptionPane.showMessageDialog(null, "Property of International Kim Loong Wushu Center.  Developed by Riaan Swart (www.bourbontank.com).");
             }
         });
 
@@ -167,7 +171,7 @@ public class View extends JFrame {
         consultationPanel.add(consultationListScroller, BorderLayout.LINE_START);
         
         // Consultation info area
-        consultationInfoArea = new JTextArea();
+        consultationInfoArea = new JEditorPane();
         consultationInfoArea.setText("No info.");
         consultationInfoArea.setEditable(false);
         JScrollPane consultationInfoScroll = new JScrollPane(consultationInfoArea);
@@ -187,10 +191,26 @@ public class View extends JFrame {
         mainPanel.add(meridianListScroller, BorderLayout.WEST);
 
         // Consultation detail area
-        consultationDetailArea = new JTextArea();
-        consultationDetailArea.setText("");
-        consultationDetailArea.setEditable(false);
-        JScrollPane consultationDetailScroll = new JScrollPane(consultationDetailArea);
+        JPanel consultationDetailPanel = new JPanel();
+        consultationDetailPanel.setLayout(new GridLayout());
+        JScrollPane consultationDetailScroll = new JScrollPane(consultationDetailPanel);
+        
+        consultationLeftDetailArea = new JLabel();
+        consultationLeftDetailArea.setVerticalAlignment(JLabel.TOP);
+        consultationLeftDetailArea.setVerticalTextPosition(JLabel.TOP);
+        
+        consultationLeftDetailArea.setMinimumSize(new Dimension(300, 400));
+        consultationLeftDetailArea.setText("");
+        consultationDetailPanel.add(consultationLeftDetailArea, BorderLayout.WEST);
+        
+        consultationRightDetailArea = new JLabel();
+        consultationRightDetailArea.setVerticalAlignment(JLabel.TOP);
+        consultationRightDetailArea.setVerticalTextPosition(JLabel.TOP);
+        
+        consultationRightDetailArea.setText("");
+        //consultationRightDetailArea.setEditable(false);
+        consultationDetailPanel.add(consultationRightDetailArea, BorderLayout.EAST);
+        
         mainPanel.add(consultationDetailScroll, BorderLayout.CENTER);
         
         add(mainPanel, BorderLayout.CENTER);
@@ -242,19 +262,25 @@ public class View extends JFrame {
         
         List<SidedAcupuncturePoint> points = consultation.getAcupuncturePoints();
         
-        consultationDetailArea.setText("");
-        
+        String leftText = "<html><body><h1>&nbsp;&nbsp;&nbsp;&nbsp;Left</h1><ul>";
+        String rightText = "<html><body><h1>&nbsp;&nbsp;&nbsp;&nbsp;Right</h1><ul>";
+        		
+        		
         for (SidedAcupuncturePoint p: points) {
-            String currentText = consultationDetailArea.getText();
             if (p.side == SidedAcupuncturePoint.LEFT) {
-                //consultationDetailArea.setText(currentText + "Left: " + p.p.commonName + "\n");
-                consultationDetailArea.setText(currentText + p.p.commonName + ": " + p.p.name + "\n");
+                leftText += "<li>" + p.p.commonName + ": " + p.p.name + "</li>";
             }
-//            else if (p.side == SidedAcupuncturePoint.RIGHT) {
-//                consultationDetailArea.setText(currentText + "Right: " + p.p.commonName + "\n");
-//            }
+            else if (p.side == SidedAcupuncturePoint.RIGHT) {
+                rightText += "<li>" + p.p.commonName + ": " + p.p.name + "</li>";
+            }
             
         }
+        
+        leftText += "</ul></body></html>";
+        rightText += "</ul></body></html>";
+                
+        consultationLeftDetailArea.setText(leftText);
+        consultationRightDetailArea.setText(rightText);
     }
 
     public DefaultListModel getMeridianListModel() {
